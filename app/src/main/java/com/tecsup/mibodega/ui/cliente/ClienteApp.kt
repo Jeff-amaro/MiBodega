@@ -27,15 +27,6 @@ import com.tecsup.mibodega.ui.cliente.screens.registro.RegistroScreen
  * Ninguna Screen navega sola ni modifica el carrito directamente:
  * todas reciben funciones (lambdas) desde aquí (state hoisting).
  */
-private object Rutas {
-    const val BIENVENIDA = "bienvenida"
-    const val REGISTRO = "registro"
-    const val INICIO = "inicio"
-    const val DETALLE = "detalle/{productoId}"
-    const val CARRITO = "carrito"
-
-    fun detalle(productoId: Int) = "detalle/$productoId"
-}
 
 @Composable
 fun ClienteApp() {
@@ -46,37 +37,37 @@ fun ClienteApp() {
 
     NavHost(
         navController = navController,
-        startDestination = Rutas.BIENVENIDA
+        startDestination = Ruta.Bienvenida.ruta
     ) {
-        composable(Rutas.BIENVENIDA) {
+        composable(Ruta.Bienvenida.ruta) {
             BienvenidaScreen(
-                onRegistrarse = { navController.navigate(Rutas.REGISTRO) },
+                onRegistrarse = { navController.navigate(Ruta.Registro.ruta) },
                 onIniciarSesion = {
-                    navController.navigate(Rutas.INICIO) {
-                        popUpTo(Rutas.BIENVENIDA) { inclusive = true }
+                    navController.navigate(Ruta.Inicio.ruta) {
+                        popUpTo(Ruta.Bienvenida.ruta) { inclusive = true }
                     }
                 },
                 onTerminos = { /* TODO: abrir términos y condiciones */ }
             )
         }
 
-        composable(Rutas.REGISTRO) {
+        composable(Ruta.Registro.ruta) {
             RegistroScreen(
                 onVolver = { navController.popBackStack() },
                 onCrearCuenta = { nombre, telefono, direccion, referencia ->
-                    navController.navigate(Rutas.INICIO) {
-                        popUpTo(Rutas.BIENVENIDA) { inclusive = true }
+                    navController.navigate(Ruta.Inicio.ruta) {
+                        popUpTo(Ruta.Bienvenida.ruta) { inclusive = true }
                     }
                 }
             )
         }
 
-        composable(Rutas.INICIO) {
+        composable(Ruta.Inicio.ruta) {
             InicioScreen(
                 cantidadCarrito = carrito.sumOf { it.cantidad },
-                onVerCarrito = { navController.navigate(Rutas.CARRITO) },
+                onVerCarrito = { navController.navigate(Ruta.Carrito.ruta) },
                 onProductoClick = { producto ->
-                    navController.navigate(Rutas.detalle(producto.id))
+                    navController.navigate("detalle/${producto.id}")
                 },
                 onAgregarProducto = { producto ->
                     carrito = agregarOSumarProducto(carrito, producto, 1)
@@ -85,7 +76,7 @@ fun ClienteApp() {
         }
 
         composable(
-            route = Rutas.DETALLE,
+            route = "detalle/{productoId}",
             arguments = listOf(navArgument("productoId") { type = NavType.IntType })
         ) { backStackEntry ->
             val productoId = backStackEntry.arguments?.getInt("productoId") ?: 0
@@ -101,7 +92,7 @@ fun ClienteApp() {
             )
         }
 
-        composable(Rutas.CARRITO) {
+        composable(Ruta.Carrito.ruta) {
             CarritoScreen(
                 carrito = carrito,
                 onVolver = { navController.popBackStack() },
