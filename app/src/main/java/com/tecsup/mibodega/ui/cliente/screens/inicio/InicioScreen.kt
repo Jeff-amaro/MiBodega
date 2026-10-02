@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,7 +15,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -53,14 +55,8 @@ import com.tecsup.mibodega.ui.theme.BodegaTheme
 import com.tecsup.mibodega.ui.theme.GrisClaro
 import com.tecsup.mibodega.ui.theme.VerdeBodega
 
-/**
- * Pantalla 3: Inicio / Productos (mockup "Cliente").
- * La más completa: Scaffold (topBar + bottomBar), LazyRow de categorías
- * y LazyVerticalGrid de productos.
- *
- * @param productos lista completa (fake por ahora, luego vendrá de un ViewModel)
- * @param cantidadCarrito para el badge del carrito en la topBar
- */
+enum class OrdenPrecio { SIN_ORDEN, MENOR_A_MAYOR, MAYOR_A_MENOR }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InicioScreen(
@@ -72,11 +68,18 @@ fun InicioScreen(
 ) {
     var categoriaSeleccionada by remember { mutableStateOf(listaCategorias.first()) }
     var textoBusqueda by remember { mutableStateOf("") }
+    var ordenPrecio by remember { mutableStateOf(OrdenPrecio.SIN_ORDEN) }
 
     val productosFiltrados = productos.filter { producto ->
         val coincideCategoria = categoriaSeleccionada == "Todos" || producto.categoria == categoriaSeleccionada
         val coincideBusqueda = producto.nombre.contains(textoBusqueda, ignoreCase = true)
         coincideCategoria && coincideBusqueda
+    }.let { lista ->
+        when (ordenPrecio) {
+            OrdenPrecio.MENOR_A_MAYOR -> lista.sortedBy { it.precio }
+            OrdenPrecio.MAYOR_A_MENOR -> lista.sortedByDescending { it.precio }
+            OrdenPrecio.SIN_ORDEN -> lista
+        }
     }
 
     Scaffold(
@@ -124,11 +127,37 @@ fun InicioScreen(
                 )
             )
 
-            Text(
-                text = "Productos destacados",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(top = 20.dp, bottom = 4.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp, bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Productos destacados",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(Modifier.weight(1f))
+                FilterChip(
+                    selected = ordenPrecio != OrdenPrecio.SIN_ORDEN,
+                    onClick = {
+                        ordenPrecio = when (ordenPrecio) {
+                            OrdenPrecio.SIN_ORDEN -> OrdenPrecio.MENOR_A_MAYOR
+                            OrdenPrecio.MENOR_A_MAYOR -> OrdenPrecio.MAYOR_A_MENOR
+                            OrdenPrecio.MAYOR_A_MENOR -> OrdenPrecio.SIN_ORDEN
+                        }
+                    },
+                    label = {
+                        Text(
+                            when (ordenPrecio) {
+                                OrdenPrecio.SIN_ORDEN -> "Precio: Normal"
+                                OrdenPrecio.MENOR_A_MAYOR -> "Precio: $ ↑"
+                                OrdenPrecio.MAYOR_A_MENOR -> "Precio: $ ↓"
+                            }
+                        )
+                    }
+                )
+            }
 
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -161,8 +190,6 @@ fun InicioScreen(
         }
     }
 }
-
-// Sub-composables PRIVADOS: solo los usa esta pantalla.
 
 @Composable
 private fun ChipCategoria(
