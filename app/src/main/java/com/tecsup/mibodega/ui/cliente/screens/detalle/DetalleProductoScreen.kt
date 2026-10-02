@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ShoppingBasket
 import androidx.compose.material3.Icon
@@ -29,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -114,6 +116,8 @@ fun DetalleProductoScreen(
 
 @Composable
 private fun EncabezadoDetalle(onVolver: () -> Unit) {
+    var esFavorito by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -124,8 +128,12 @@ private fun EncabezadoDetalle(onVolver: () -> Unit) {
         IconButton(onClick = onVolver) {
             Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
         }
-        IconButton(onClick = { /* TODO: guardar como favorito */ }) {
-            Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorito")
+        IconButton(onClick = { esFavorito = !esFavorito }) {
+            Icon(
+                imageVector = if (esFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = "Favorito",
+                tint = if (esFavorito) Color.Red else MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
@@ -161,4 +169,3 @@ private fun DetalleProductoPreview() {
         )
     }
 }
-
