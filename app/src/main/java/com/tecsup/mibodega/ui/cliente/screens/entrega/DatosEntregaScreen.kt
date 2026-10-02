@@ -31,17 +31,21 @@ import com.tecsup.mibodega.ui.componentes.CampoTexto
 
 @Composable
 fun DatosEntregaScreen(
-    total: Double,
+    subtotal: Double,
     direccionInicial: String = "",
     referenciaInicial: String = "",
     onVolver: () -> Unit,
     onConfirmarPedido: () -> Unit
 ) {
+    var tipoEnvio by remember { mutableStateOf("Delivery") } // "Delivery" o "Recojo en Tienda"
     var direccion by remember { mutableStateOf(direccionInicial) }
     var referencia by remember { mutableStateOf(referenciaInicial) }
     var metodoPago by remember { mutableStateOf("Efectivo") }
 
     var validarFormulario by remember { mutableStateOf(false) }
+
+    val costoEnvio = if (tipoEnvio == "Delivery") 4.0 else 0.0
+    val total = subtotal + costoEnvio
 
     Column(
         modifier = Modifier
@@ -54,27 +58,54 @@ fun DatosEntregaScreen(
             IconButton(onClick = onVolver) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
             }
-            Text("Datos de entrega", style = MaterialTheme.typography.titleLarge)
+            Text("Tipo de Entrega y Pago", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         }
 
         Spacer(Modifier.height(16.dp))
 
-        CampoTexto(
-            etiqueta = "Dirección de entrega",
-            valor = direccion,
-            onValorCambia = { direccion = it },
-            placeholder = "Av. Los Olivos 123",
-            esError = validarFormulario && direccion.isBlank(),
-            mensajeError = "La dirección no puede estar vacía"
-        )
-        Spacer(Modifier.height(12.dp))
+        Text("Modo de Entrega", fontWeight = FontWeight.Bold)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(
+                selected = (tipoEnvio == "Delivery"),
+                onClick = { tipoEnvio = "Delivery" }
+            )
+            Text("Delivery (S/ 4.00)")
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            RadioButton(
+                selected = (tipoEnvio == "Recojo en Tienda"),
+                onClick = { tipoEnvio = "Recojo en Tienda" }
+            )
+            Text("Recojo en Tienda (Gratis)")
+        }
 
-        CampoTexto(
-            etiqueta = "Referencia",
-            valor = referencia,
-            onValorCambia = { referencia = it },
-            placeholder = "Frente al parque"
-        )
+        Spacer(Modifier.height(16.dp))
+
+        if (tipoEnvio == "Delivery") {
+            CampoTexto(
+                etiqueta = "Dirección de entrega",
+                valor = direccion,
+                onValorCambia = { direccion = it },
+                placeholder = "Av. Los Olivos 123",
+                esError = validarFormulario && direccion.isBlank(),
+                mensajeError = "La dirección no puede estar vacía para delivery"
+            )
+            Spacer(Modifier.height(12.dp))
+
+            CampoTexto(
+                etiqueta = "Referencia",
+                valor = referencia,
+                onValorCambia = { referencia = it },
+                placeholder = "Frente al parque"
+            )
+        } else {
+            Text(
+                text = "Dirección de la tienda: Av. Principal #456 - Bodega Central",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
 
         Spacer(Modifier.height(20.dp))
 
@@ -110,7 +141,7 @@ fun DatosEntregaScreen(
             texto = "Realizar pedido",
             onClick = {
                 validarFormulario = true
-                if (direccion.isNotBlank()) {
+                if (tipoEnvio == "Recojo en Tienda" || direccion.isNotBlank()) {
                     onConfirmarPedido()
                 }
             }
