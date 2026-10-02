@@ -15,7 +15,9 @@ import com.tecsup.mibodega.ui.cliente.modelo.Producto
 import com.tecsup.mibodega.ui.cliente.modelo.listaProductosFake
 import com.tecsup.mibodega.ui.cliente.screens.bienvenida.BienvenidaScreen
 import com.tecsup.mibodega.ui.cliente.screens.carrito.CarritoScreen
+import com.tecsup.mibodega.ui.cliente.screens.confirmacion.ConfirmacionScreen
 import com.tecsup.mibodega.ui.cliente.screens.detalle.DetalleProductoScreen
+import com.tecsup.mibodega.ui.cliente.screens.entrega.DatosEntregaScreen
 import com.tecsup.mibodega.ui.cliente.screens.inicio.InicioScreen
 import com.tecsup.mibodega.ui.cliente.screens.registro.RegistroScreen
 
@@ -122,7 +124,36 @@ fun ClienteApp() {
                 onEliminar = { producto ->
                     carrito = carrito.filterNot { it.producto.id == producto.id }
                 },
-                onContinuarPedido = { /* TODO: navegar a DatosEntregaScreen */ }
+                onContinuarPedido = {
+                    navController.navigate(Ruta.DatosEntrega.ruta)
+                }
+            )
+        }
+
+        composable(Ruta.DatosEntrega.ruta) {
+            val subtotal = carrito.sumOf { it.producto.precio * it.cantidad }
+            val costoDelivery = if (carrito.isNotEmpty()) 4.0 else 0.0
+            val total = subtotal + costoDelivery
+
+            DatosEntregaScreen(
+                total = total,
+                direccionInicial = clienteDireccion,
+                referenciaInicial = clienteReferencia,
+                onVolver = { navController.popBackStack() },
+                onConfirmarPedido = {
+                    navController.navigate(Ruta.Confirmacion.ruta)
+                }
+            )
+        }
+
+        composable(Ruta.Confirmacion.ruta) {
+            ConfirmacionScreen(
+                onVolverInicio = {
+                    carrito = emptyList() // Vacía el carrito tras compra exitosa
+                    navController.navigate(Ruta.Inicio.ruta) {
+                        popUpTo(Ruta.Inicio.ruta) { inclusive = true }
+                    }
+                }
             )
         }
     }
