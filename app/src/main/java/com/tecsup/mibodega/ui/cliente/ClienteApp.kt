@@ -35,6 +35,11 @@ fun ClienteApp() {
     // El carrito vive aquí arriba, no en ninguna Screen.
     var carrito by remember { mutableStateOf<List<ItemCarrito>>(emptyList()) }
 
+    var clienteNombre by remember { mutableStateOf("") }
+    var clienteTelefono by remember { mutableStateOf("") }
+    var clienteDireccion by remember { mutableStateOf("") }
+    var clienteReferencia by remember { mutableStateOf("") }
+
     NavHost(
         navController = navController,
         startDestination = Ruta.Bienvenida.ruta
@@ -55,6 +60,10 @@ fun ClienteApp() {
             RegistroScreen(
                 onVolver = { navController.popBackStack() },
                 onCrearCuenta = { nombre, telefono, direccion, referencia ->
+                    clienteNombre = nombre
+                    clienteTelefono = telefono
+                    clienteDireccion = direccion
+                    clienteReferencia = referencia
                     navController.navigate(Ruta.Inicio.ruta) {
                         popUpTo(Ruta.Bienvenida.ruta) { inclusive = true }
                     }
