@@ -1,7 +1,9 @@
 package com.tecsup.mibodega.ui.cliente.screens.bienvenida
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,25 +11,31 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.AlertDialog
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tecsup.mibodega.R
-import com.tecsup.mibodega.ui.componentes.BotonPrimario
-import com.tecsup.mibodega.ui.componentes.BotonSecundario
-import com.tecsup.mibodega.ui.componentes.CampoTexto
 
 @Composable
 fun BienvenidaScreen(
@@ -35,112 +43,126 @@ fun BienvenidaScreen(
     onIniciarSesion: () -> Unit,
     onTerminos: () -> Unit
 ) {
-    var mostrarModalLogin by remember { mutableStateOf(false) }
-    var usuario by remember { mutableStateOf("") }
-    var contrasena by remember { mutableStateOf("") }
-    var errorLogin by remember { mutableStateOf<String?>(null) }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .safeDrawingPadding()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 28.dp, vertical = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.height(10.dp))
 
+        // 1. Logo Bodega Hub
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
-            contentDescription = "Logo Mi Bodega",
-            modifier = Modifier.size(120.dp)
+            painter = painterResource(id = R.drawable.imagen_bodega),
+            contentDescription = "Logo Bodega Hub",
+            modifier = Modifier
+                .size(240.dp)
+                .clip(RoundedCornerShape(20.dp))
         )
 
-        Spacer(Modifier.height(16.dp))
+        // 2. Título bicolor
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(color = Color(0xFF1C1B1F), fontWeight = FontWeight.Bold, fontSize = 34.sp)) {
+                        append("Mi ")
+                    }
+                    withStyle(style = SpanStyle(color = Color(0xFF2E7D32), fontWeight = FontWeight.Bold, fontSize = 34.sp)) {
+                        append("Bodega")
+                    }
+                }
+            )
 
-        Text(
-            text = "Mi Bodega",
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold
-        )
+            Spacer(Modifier.height(8.dp))
 
-        Text(
-            text = "Tus productos de siempre en la puerta de tu casa",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(Modifier.weight(1f))
-
-        BotonPrimario(
-            texto = "Registrarme",
-            onClick = onRegistrarse
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        BotonSecundario(
-            texto = "Iniciar sesión",
-            onClick = { mostrarModalLogin = true }
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        TextButton(onClick = onTerminos) {
-            Text("Términos y Condiciones", style = MaterialTheme.typography.labelMedium)
+            Text(
+                text = "Tus productos de siempre\nen la puerta de tu casa",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontSize = 15.sp,
+                    lineHeight = 20.sp
+                ),
+                color = Color.Gray,
+                textAlign = TextAlign.Center
+            )
         }
-    }
 
-    if (mostrarModalLogin) {
-        AlertDialog(
-            onDismissRequest = { mostrarModalLogin = false },
-            title = { Text("Iniciar sesión") },
-            text = {
-                Column {
-                    CampoTexto(
-                        etiqueta = "Usuario",
-                        valor = usuario,
-                        onValorCambia = { usuario = it },
-                        placeholder = "cliente"
+        // 3. Botones según la estructura requerida
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(
+                onClick = onRegistrarse,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Phone,
+                        contentDescription = "Teléfono",
+                        tint = Color.White,
+                        modifier = Modifier.size(26.dp)
                     )
-                    Spacer(Modifier.height(8.dp))
-                    CampoTexto(
-                        etiqueta = "Contraseña",
-                        valor = contrasena,
-                        onValorCambia = { contrasena = it },
-                        placeholder = "123",
-                        esContrasena = true
-                    )
-                    if (errorLogin != null) {
-                        Spacer(Modifier.height(8.dp))
+                    Spacer(Modifier.width(12.dp))
+                    Column {
                         Text(
-                            text = errorLogin!!,
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodySmall
+                            text = "Registrarme",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 17.sp
+                        )
+                        Text(
+                            text = "con mi teléfono",
+                            color = Color.White.copy(alpha = 0.9f),
+                            fontSize = 13.sp
                         )
                     }
                 }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        // Credenciales fijas de prueba: usuario="cliente", clave="123"
-                        if (usuario == "cliente" && contrasena == "123") {
-                            mostrarModalLogin = false
-                            onIniciarSesion()
-                        } else {
-                            errorLogin = "Usuario o contraseña incorrectos"
-                        }
-                    }
-                ) {
-                    Text("Ingresar")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { mostrarModalLogin = false }) {
-                    Text("Cancelar")
-                }
             }
-        )
+
+            Spacer(Modifier.height(12.dp))
+
+            OutlinedButton(
+                onClick = onIniciarSesion,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(
+                    text = "Iniciar sesión",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                    color = Color.Black
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                text = "Al continuar aceptas nuestros",
+                fontSize = 12.sp,
+                color = Color.Gray
+            )
+            TextButton(
+                onClick = onTerminos,
+                modifier = Modifier.height(32.dp)
+            ) {
+                Text(
+                    text = "Términos y Condiciones",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1976D2)
+                )
+            }
+        }
     }
 }

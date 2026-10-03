@@ -4,6 +4,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -48,13 +51,12 @@ private object Rutas {
 fun ClienteApp() {
     val navController = rememberNavController()
 
-    // Estado general del carrito
     var carrito by remember { mutableStateOf<List<ItemCarrito>>(emptyList()) }
-
-    // Estado del tema (Modo Oscuro)
     var esModoOscuro by remember { mutableStateOf(false) }
+    var mostrarTerminos by remember { mutableStateOf(false) }
 
-    // Datos del perfil/cliente
+    var esNuevoRegistro by remember { mutableStateOf(true) }
+
     var clienteNombre by remember { mutableStateOf("") }
     var clienteTelefono by remember { mutableStateOf("") }
     var clienteDireccion by remember { mutableStateOf("") }
@@ -71,24 +73,28 @@ fun ClienteApp() {
         ) {
             composable(Rutas.BIENVENIDA) {
                 BienvenidaScreen(
-                    onRegistrarse = { navController.navigate(Rutas.REGISTRO) },
-                    onIniciarSesion = {
-                        navController.navigate(Rutas.INICIO) {
-                            popUpTo(Rutas.BIENVENIDA) { inclusive = true }
-                        }
+                    onRegistrarse = {
+                        esNuevoRegistro = true
+                        navController.navigate(Rutas.REGISTRO)
                     },
-                    onTerminos = { /* TODO: abrir términos y condiciones */ }
+                    onIniciarSesion = {
+                        esNuevoRegistro = false
+                        navController.navigate(Rutas.REGISTRO)
+                    },
+                    onTerminos = { mostrarTerminos = true }
                 )
             }
 
             composable(Rutas.REGISTRO) {
                 RegistroScreen(
+                    esNuevoRegistro = esNuevoRegistro,
                     onVolver = { navController.popBackStack() },
-                    onCrearCuenta = { nombre, telefono, direccion, referencia ->
-                        clienteNombre = nombre
-                        clienteTelefono = telefono
-                        clienteDireccion = direccion
-                        clienteReferencia = referencia
+                    onConfirmar = { nombre, telefono, direccion, referencia ->
+                        if (nombre.isNotEmpty()) clienteNombre = nombre
+                        if (telefono.isNotEmpty()) clienteTelefono = telefono
+                        if (direccion.isNotEmpty()) clienteDireccion = direccion
+                        if (referencia.isNotEmpty()) clienteReferencia = referencia
+
                         navController.navigate(Rutas.INICIO) {
                             popUpTo(Rutas.BIENVENIDA) { inclusive = true }
                         }
@@ -128,24 +134,27 @@ fun ClienteApp() {
 
             composable(Rutas.CARRITO) {
                 CarritoScreen(
-                    carrito = carrito,
+                    itemsCarrito = carrito,
                     onVolver = { navController.popBackStack() },
-                    onIncrementar = { producto ->
+                    onIncrementar = { item ->
                         carrito = carrito.map {
-                            if (it.producto.id == producto.id) it.copy(cantidad = it.cantidad + 1) else it
+                            if (it.producto.id == item.producto.id) it.copy(cantidad = it.cantidad + 1) else it
                         }
                     },
-                    onDecrementar = { producto ->
+                    onDecrementar = { item ->
                         carrito = carrito.mapNotNull {
                             when {
-                                it.producto.id != producto.id -> it
+                                it.producto.id != item.producto.id -> it
                                 it.cantidad > 1 -> it.copy(cantidad = it.cantidad - 1)
                                 else -> null
                             }
                         }
                     },
-                    onEliminar = { producto ->
-                        carrito = carrito.filterNot { it.producto.id == producto.id }
+                    onEliminar = { item ->
+                        carrito = carrito.filterNot { it.producto.id == item.producto.id }
+                    },
+                    onVaciarCarrito = {
+                        carrito = emptyList()
                     },
                     onContinuarPedido = {
                         navController.navigate(Rutas.DATOS_ENTREGA)
@@ -167,9 +176,17 @@ fun ClienteApp() {
             }
 
             composable(Rutas.CONFIRMACION) {
+                val subtotal = carrito.sumOf { it.producto.precio * it.cantidad }
                 ConfirmacionScreen(
+                    numeroPedido = "#1024",
+                    total = subtotal,
+                    direccion = if (clienteDireccion.isNotEmpty()) clienteDireccion else "Av. Los Olivos 123",
+                    referencia = if (clienteReferencia.isNotEmpty()) clienteReferencia else "Frente al parque",
+                    onVerEstado = {
+                        navController.navigate(Rutas.MIS_PEDIDOS)
+                    },
                     onVolverInicio = {
-                        carrito = emptyList() // Limpia carrito tras la compra
+                        carrito = emptyList()
                         navController.navigate(Rutas.INICIO) {
                             popUpTo(Rutas.INICIO) { inclusive = true }
                         }
@@ -205,6 +222,24 @@ fun ClienteApp() {
                     onVolver = { navController.popBackStack() }
                 )
             }
+        }
+
+        if (mostrarTerminos) {
+            AlertDialog(
+                onDismissRequest = { mostrarTerminos = false },
+                title = { Text(text = "Términos y Condiciones") },
+                text = {
+                    Text(
+                        text = "Bienvenido a Mi Bodega. Al utilizar nuestra aplicación aceptas el uso de tus datos " +
+                                "únicamente para el procesamiento de tus pedidos y envíos a domicilio."
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { mostrarTerminos = false }) {
+                        Text("Entendido")
+                    }
+                }
+            )
         }
     }
 }
