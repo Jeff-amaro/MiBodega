@@ -55,7 +55,7 @@ fun BienvenidaScreen(
 
         // 1. Logo Bodega Hub
         Image(
-            painter = painterResource(id = R.drawable.imagen_bodega),
+            painter = painterResource(id = R.drawable.ilustracion_bodega),
             contentDescription = "Logo Bodega Hub",
             modifier = Modifier
                 .size(240.dp)

@@ -1,37 +1,17 @@
 package com.tecsup.mibodega.ui.cliente.screens.detalle
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,49 +27,48 @@ import com.tecsup.mibodega.ui.cliente.modelo.Producto
 fun DetalleProductoScreen(
     producto: Producto,
     onVolver: () -> Unit,
-    onAgregarAlCarrito: (Producto, Int) -> Unit
+    onAgregarProducto: (Producto) -> Unit,
+    onToggleFavorito: (Producto) -> Unit
 ) {
-    var cantidad by remember { mutableIntStateOf(1) }
-
-    Scaffold(
-        modifier = Modifier.safeDrawingPadding(),
-        topBar = {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .safeDrawingPadding()
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState())
+        ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
             ) {
                 IconButton(onClick = onVolver) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Volver",
-                        tint = Color.Black
+                        tint = MaterialTheme.colorScheme.onBackground
                     )
                 }
-                IconButton(onClick = { }) {
-                    Icon(
-                        imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = "Favorito",
-                        tint = Color.Black
-                    )
-                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Detalle del Producto",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
             }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp)
-        ) {
-            // Contenedor de la Imagen Real del Producto
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(280.dp)
-                    .clip(RoundedCornerShape(16.dp)),
+                    .height(240.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
@@ -98,106 +77,68 @@ fun DetalleProductoScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentScale = ContentScale.Fit
                 )
+                IconButton(
+                    onClick = { onToggleFavorito(producto) },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = if (producto.esFavorito) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = "Favorito",
+                        tint = if (producto.esFavorito) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
-            // Nombre del producto
             Text(
                 text = producto.nombre,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.Black
+                color = MaterialTheme.colorScheme.onSurface
             )
 
-            // Peso
             Text(
-                text = producto.peso,
+                text = "Presentación: ${producto.peso}",
                 fontSize = 14.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Precio
             Text(
-                text = "S/ ${String.format("%.2f", producto.precio)}",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFE53935)
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Descripción
-            Text(
-                text = producto.descripcion,
+                text = "Categoría: ${producto.categoria}",
                 fontSize = 14.sp,
-                color = Color.Gray,
-                lineHeight = 20.sp
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Contador de cantidad (- 1 +)
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .background(Color(0xFFF2F4F7), RoundedCornerShape(24.dp))
-                    .padding(horizontal = 8.dp, vertical = 4.dp)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = { if (cantidad > 1) cantidad-- },
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(Color.White, CircleShape)
-                ) {
-                    Icon(Icons.Default.Remove, contentDescription = "Restar", tint = Color.Black)
-                }
-
                 Text(
-                    text = cantidad.toString(),
-                    fontSize = 18.sp,
+                    text = "S/ ${String.format("%.2f", producto.precio)}",
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 20.dp)
+                    color = MaterialTheme.colorScheme.primary
                 )
 
-                IconButton(
-                    onClick = { cantidad++ },
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(Color(0xFF2E7D32), CircleShape)
+                Button(
+                    onClick = { onAgregarProducto(producto) },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Sumar", tint = Color.White)
+                    Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Agregar al Carrito", color = MaterialTheme.colorScheme.onPrimary)
                 }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Botón Agregar al carrito
-            Button(
-                onClick = { onAgregarAlCarrito(producto, cantidad) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF2E7D32))
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ShoppingCart,
-                    contentDescription = null,
-                    tint = Color.White
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Agregar al carrito",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

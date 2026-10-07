@@ -4,8 +4,9 @@ data class Producto(
     val id: Int,
     val nombre: String,
     val descripcion: String = "",
-    val precio: Double,
-    val categoria: String,
+    val categoria: String = "",
+    val precio: Double = 0.0,
+    val peso: String = "",
     val imagenUrl: String = "",
-    val peso: String = "1 kg"
+    val esFavorito: Boolean = false
 )
